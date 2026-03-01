@@ -1,6 +1,8 @@
-# TIL: Softmax is an output specialist, not a hidden layer team player
-**Date:** 2026-03-01
-**Category:** machine-learning
+---
+title: "TIL: Softmax is an output specialist, not a hidden layer team player"
+date: 2026-03-01
+category: machine-learning
+---
 
 ### What I learned
 There is a strict difference between **Softmax Regression** (a specific model architecture) and the **Softmax Activation Function**. 
