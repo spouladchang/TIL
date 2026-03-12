@@ -8,11 +8,11 @@ category: machine-learning
 There is a strict difference between **Softmax Regression** (a specific model architecture) and the **Softmax Activation Function**. 
 Softmax Regression is fundamentally a linear classifier with zero hidden layers — inputs map directly to a Softmax output layer. 
 
-While you *can* technically use the Softmax activation function inside hidden layers of a deep network, it is a terrible idea for two engineering reasons:
-1. **Destructive Competition:** Hidden layer neurons need to collaborate to find independent features (e.g., one finds edges, another finds color). Softmax forces them to compete because their outputs must sum to 1. If one neuron finds a strong feature, it suppresses the outputs of all other neurons in that layer.
-2. **Severe Vanishing Gradient:** Its complex derivative aggressively shrinks gradients, causing the learning signal to die off even faster than Sigmoid when backpropagated through multiple layers. 
+While you *can* technically use the Softmax activation function inside hidden layers of a deep network, it is a terrible idea for one fundamental engineering reason:
 
-Softmax belongs exclusively in the final output layer to convert raw logits into mutually exclusive class probabilities.
+**Destructive Competition:** Hidden layer neurons need to *collaborate* to find independent features (e.g., one finds edges, another finds color, another finds texture). Softmax forces them to *compete* because all outputs must sum to 1. If one neuron finds a strong feature and fires strongly, it mathematically suppresses every other neuron in that layer — even if those neurons also found something useful. The layer stops being a team of independent detectors and becomes a winner-takes-all tournament.
+
+Softmax belongs exclusively in the final output layer, where mutual exclusivity is exactly what you want: converting raw logits into a probability distribution over classes.
 
 ### Simple example
 
@@ -41,5 +41,3 @@ print(relu(hidden_layer_signals))
 
 ### Why it matters
 It explains why simple Softmax Regression models fail catastrophically on non-linear datasets. Since they lack hidden layers, they can only draw straight decision boundaries. To solve complex, non-linear problems, you must upgrade to a Deep Neural Network (like a Multi-Layer Perceptron) by using collaborative functions (e.g., ReLU) in the hidden layers to learn complex patterns, and reserving Softmax strictly for the final classification layer.
-
-**Source:** Analyzing the architectural limits of Softmax Regression vs. Deep Neural Networks on non-linear data distributions.
