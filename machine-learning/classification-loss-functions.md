@@ -42,4 +42,4 @@ model_multi.compile(loss='sparse_categorical_crossentropy', optimizer='adam')
 ```
 
 ### Why it matters
-The loss function is the mathematical objective your model tries to minimize. If you use `categorical_crossentropy` on integer labels, your code will simply crash. If you use standard loss functions on highly imbalanced data, your model will cheat (always predicting the majority class) and become useless in production. Matching the loss function to your data's reality is the foundational step of building any classifier.
+The loss function is the mathematical objective your model tries to minimize. If you use `categorical_crossentropy` on integer labels, your model will silently produce completely wrong results — which is often worse than a crash because you won't know something is broken. If you use standard loss functions on highly imbalanced data, your model will cheat (always predicting the majority class) and become useless in production. Matching the loss function to your data's reality is the foundational step of building any classifier.
