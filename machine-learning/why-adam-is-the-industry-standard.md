@@ -5,11 +5,11 @@ category: machine-learning
 ---
 
 ### What I learned
-We previously saw two powerful tricks to improve Vanilla SGD: 
-1. **Momentum:** Adds "inertia" (like a snowball rolling down a hill) to power through flat regions and smooth out bounces.
-2. **RMSprop:** Adds an "adaptive learning rate" (smart brakes) to slow down in steep ravines and speed up in flat valleys.
+Two earlier techniques improved on Vanilla SGD in very different ways:
+- **Momentum** adds "inertia" to gradient updates — like a snowball gaining speed downhill — so the optimizer powers through flat regions and stops bouncing in narrow valleys.
+- **RMSprop** adds an "adaptive learning rate" — like a smart transmission — automatically applying brakes on steep slopes and accelerating on flat ones.
 
-**Adam (Adaptive Moment Estimation)** simply takes these two concepts and smashes them together. It calculates both the moving average of past gradients (the Momentum part, called the first moment) and the moving average of past *squared* gradients (the RMSprop part, called the second moment). 
+**Adam (Adaptive Moment Estimation)** simply takes these two concepts and combines them. It calculates both the moving average of past gradients (the Momentum part, called the first moment) and the moving average of past *squared* gradients (the RMSprop part, called the second moment). 
 
 
 
