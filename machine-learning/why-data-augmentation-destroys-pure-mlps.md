@@ -9,7 +9,7 @@ category: machine-learning
 
 However, if you apply this technique to a standard Multi-Layer Perceptron (MLP or Dense Network), **you will absolutely destroy its accuracy.**
 
-Why? Because as we learned, MLPs require images to be `Flattened` into a 1D array. Every single pixel becomes a dedicated, fixed input feature tied to a specific weight. 
+Why? MLPs only accept 1D arrays as input, so every image must be `Flattened` — a 28×28 image becomes a single line of 784 pixels. Every single pixel becomes a dedicated, fixed input feature tied to a specific weight. 
 If the model learns that "Pixel #400 being black means it's a shoe," it relies heavily on that exact pixel position. 
 
 If you use Data Augmentation to shift the image just 2 pixels to the right, the black color moves from Pixel #400 to Pixel #402. The MLP is completely blind to this shift. It looks at Pixel #400, sees white, and confidently predicts "Not a shoe."
