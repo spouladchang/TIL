@@ -1,46 +1,47 @@
 ---
-title: "TIL: Hyperband vs. Bayesian Optimization: Guessing vs. Killing"
-date: 2026-03-24
+title: "TIL: Why Deep Learning Abandoned K-Fold Cross Validation"
+date: 2026-03-22
 category: machine-learning
 ---
 
 ### What I learned
-When navigating a massive hyperparameter search space (thousands of possible combinations of layers, neurons, and learning rates), Random Search is simply too dumb and slow. To fix this, the industry relies on two advanced algorithms, but they have completely different philosophies: **Bayesian Optimization** (The Detective) and **Hyperband** (The Ruthless Judge).
+In traditional Machine Learning, datasets are often small (e.g., 500 rows of customer data). If you do a simple 80/20 Train/Validation split, you might get "unlucky" and accidentally put all the hardest, weirdest customers into the 20% validation set. Your model will look terrible just by bad luck. 
 
-**1. Bayesian Optimization (Guessing)**
-Bayesian Optimization is smart. It selects a combination, trains the model for the full 50 epochs, and logs the final accuracy. Then, it uses complex probability math to look at past results and *guess* a slightly better combination for the next trial. 
-*The Flaw:* If it accidentally guesses a terrible combination, it still lets that bad model train for the full 50 epochs, wasting hours of GPU time.
-
-**2. Hyperband (Killing)**
-Hyperband doesn't try to guess the perfect combination. Instead, it relies on a brutal tournament system called **Successive Halving**. It starts by training 20 different random models, but it only gives them 5 epochs each. At epoch 5, it evaluates them and ruthlessly *kills* the worst-performing 50%. The surviving 10 models get another 10 epochs. Then it kills half again. Only the absolute best, most promising models ever reach the full 50 epochs.
+To fix this, we use **K-Fold Cross Validation**: we split the data into 5 chunks, train 5 separate models, and average their scores. This guarantees a fair evaluation.
 
 
+
+However, the Deep Learning industry has largely abandoned K-Fold. Why? **Math and Time.**
+1. **The Math (Law of Large Numbers):** Deep Learning requires massive datasets. If you have 60,000 images (like Fashion MNIST) and take a random 20% validation split (12,000 images), the laws of probability guarantee that those 12,000 images are a near-perfect statistical representation of the whole dataset. The risk of an "unlucky" split drops to practically zero.
+2. **The Time (Compute Cost):** Training a modern Neural Network takes hours, days, or even weeks. Doing 5-Fold Cross Validation means training that exact same heavy architecture 5 separate times from scratch. 
 
 ### Simple example
 
 ```python
-import keras_tuner as kt
+from tensorflow import keras
 
-# 1. The Detective (Bayesian)
-# Will run exactly 20 trials. Each trial goes all the way to the end (e.g., 50 epochs).
-# Great for small search spaces, but very slow if the models take long to train.
-tuner_bayesian = kt.BayesianOptimization(
-    build_model,
-    objective='val_accuracy',
-    max_trials=20
-)
+# ❌ BAD WAY (For Deep Learning): K-Fold Cross Validation
+# Training a Neural Network 5 times is a computational suicide mission.
+'''
+from sklearn.model_selection import KFold
+kfold = KFold(n_splits=5)
+for train_idx, val_idx in kfold.split(X):
+    model = create_model()
+    model.fit(X[train_idx], y[train_idx]) # Happens 5 times!
+'''
 
-# 2. The Ruthless Judge (Hyperband)
-# Will test many more combinations but aggressively prune (kill) the bad ones early.
-# max_epochs=50 means the absolute maximum a surviving model can train.
-# factor=3 means it kills roughly 2/3 of the models at each evaluation round.
-tuner_hyperband = kt.Hyperband(
-    build_model,
-    objective='val_accuracy',
-    max_epochs=50,
-    factor=3 
+# ✅ GOOD WAY (Industry Standard for DL): Hold-out Validation Split
+# With 60,000 samples, a 20% random split is statistically rock-solid.
+# We train the model ONLY ONCE, saving 80% of our time and GPU compute.
+model = keras.Sequential([...])
+
+model.fit(
+    X_train, 
+    y_train, 
+    validation_split=0.2, # Keras automatically holds out a reliable 20%
+    epochs=50
 )
 ```
 
 ### Why it matters
-Choosing the right tuner is the difference between a project taking 2 hours versus taking an entire weekend. While Bayesian Optimization is mathematically elegant, Deep Learning models are so computationally heavy that letting a bad model train to completion is a luxury we cannot afford. Hyperband explicitly solves this by reallocating your hardware's compute power: it steals resources away from garbage models and gives them entirely to the winners. In the modern AI workflow, Hyperband is the undeniable king of efficient hyperparameter tuning.
+Understanding this difference separates modern AI engineers from traditional statisticians. If you try to run K-Fold Cross Validation while tuning hyperparameters on a Deep Learning model, a process that should take 2 hours will suddenly take 10 hours, with zero meaningful improvement in your statistical confidence. In the era of Big Data and expensive GPUs, a single, large, well-shuffled validation set is the undisputed king of model evaluation for standard deep learning. K-Fold still has a place — medical imaging, clinical datasets, and other high-stakes domains where every labelled sample is expensive to collect and datasets are genuinely small — but for anything with tens of thousands of samples or more, it is overkill.
